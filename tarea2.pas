@@ -67,12 +67,14 @@ begin
     res.resp := nocontra
   else
   begin
+    // Buscar usuario
     i := 1;
     while (i <= gc.tope) and not igualTexto(gc.usuarios[i].usuario, us) do
       i := i + 1;
 
     if i <= gc.tope then
     begin
+      // Verificar si el servicio ya existe
       servicioExiste := false;
       servicioActual := gc.usuarios[i].serviciosUsuario;
 
@@ -86,7 +88,8 @@ begin
         res.resp := noserv
       else
       begin
-        cifradoVigenere(co, master, coCifrada);
+        // Agregar el nuevo servicio cifrado
+        cifradoVigenere(co, autenticacion.master, coCifrada); // Usar clave autenticada
         new(nuevoServicio);
         nuevoServicio^.nombreServicio := servn;
         nuevoServicio^.contraServCifrada := coCifrada;
@@ -150,12 +153,14 @@ begin
     existe := false
   else
   begin
+    // Buscar usuario
     i := 1;
     while (i <= gc.tope) and not igualTexto(gc.usuarios[i].usuario, us) do
       i := i + 1;
 
     if i <= gc.tope then
     begin
+      // Retornar la lista de servicios
       servs := gc.usuarios[i].serviciosUsuario;
       existe := true;
     end
