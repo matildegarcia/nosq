@@ -57,8 +57,7 @@ procedure agregarServicioUsuario(us: Texto; master: Clave; authInfo: TAutenticac
 var
   i: integer;
   autenticacion: TRespAutenticacion;
-  nuevoServicio: TServicios;
-  servicioActual: TServicios;
+  nuevoServicio, servicioActual: TServicios;
   servicioExiste: boolean;
   coCifrada: Texto;
 begin
@@ -77,7 +76,6 @@ begin
       // Verificar si el servicio ya existe
       servicioExiste := false;
       servicioActual := gc.usuarios[i].serviciosUsuario;
-
       while (servicioActual <> nil) and not servicioExiste do
       begin
         servicioExiste := igualTexto(servicioActual^.nombreServicio, servn);
@@ -88,13 +86,23 @@ begin
         res.resp := noserv
       else
       begin
-        // Agregar el nuevo servicio cifrado
-        cifradoVigenere(co, autenticacion.master, coCifrada); // Usar clave autenticada
+        // Crear y agregar el nuevo servicio al final de la lista
+        cifradoVigenere(co, autenticacion.master, coCifrada);
         new(nuevoServicio);
         nuevoServicio^.nombreServicio := servn;
         nuevoServicio^.contraServCifrada := coCifrada;
-        nuevoServicio^.sig := gc.usuarios[i].serviciosUsuario;
-        gc.usuarios[i].serviciosUsuario := nuevoServicio;
+        nuevoServicio^.sig := nil;
+
+        if gc.usuarios[i].serviciosUsuario = nil then
+          gc.usuarios[i].serviciosUsuario := nuevoServicio
+        else
+        begin
+          servicioActual := gc.usuarios[i].serviciosUsuario;
+          while servicioActual^.sig <> nil do
+            servicioActual := servicioActual^.sig;
+          servicioActual^.sig := nuevoServicio;
+        end;
+
         res.resp := serv;
       end;
     end
@@ -102,6 +110,7 @@ begin
       res.resp := nocontra;
   end;
 end;
+
 
 procedure contraseniaServicio(us: Texto; master: Clave; servn: Texto; 
                                gc: TGestorContrasenia; authInfo: TAutenticacion; 
