@@ -1,3 +1,4 @@
+// Procedimiento de cifrado Vigenère
 procedure cifradoVigenere(textoPlano: Texto; cl: Clave; var textoCifrado: Texto);
 var
   i, desplazamiento: integer;
@@ -10,6 +11,7 @@ begin
   end;
 end;
 
+// Procedimiento de descifrado Vigenère
 procedure descifradoVigenere(textoCifrado: Texto; cl: Clave; var textoPlano: Texto);
 var
   i, desplazamiento: integer;
@@ -22,12 +24,14 @@ begin
   end;
 end;
 
+// Procedimiento para crear el gestor de contraseñas
 procedure crearGestor(var gc: TGestorContrasenia; var authInfo: TAutenticacion);
 begin
   gc.tope := 0;
   authInfo.tope := 0;
 end;
 
+// Procedimiento para agregar un nuevo usuario
 procedure agregarUsuario(us: Texto; cl: Clave; var gc: TGestorContrasenia; 
                          var authInfo: TAutenticacion; var full, existe: boolean);
 var
@@ -51,6 +55,7 @@ begin
   end;
 end;
 
+// Procedimiento para agregar un servicio para un usuario
 procedure agregarServicioUsuario(us: Texto; master: Clave; authInfo: TAutenticacion; 
                                   servn: Texto; co: Texto; 
                                   var gc: TGestorContrasenia; var res: TRes);
@@ -66,16 +71,16 @@ begin
     res.resp := nocontra
   else
   begin
-    // Buscar usuario
     i := 1;
     while (i <= gc.tope) and not igualTexto(gc.usuarios[i].usuario, us) do
       i := i + 1;
 
     if i <= gc.tope then
     begin
-      // Verificar si el servicio ya existe
       servicioExiste := false;
       servicioActual := gc.usuarios[i].serviciosUsuario;
+
+      // Verificar si el servicio ya existe
       while (servicioActual <> nil) and not servicioExiste do
       begin
         servicioExiste := igualTexto(servicioActual^.nombreServicio, servn);
@@ -86,8 +91,10 @@ begin
         res.resp := noserv
       else
       begin
-        // Crear y agregar el nuevo servicio al final de la lista
+        // Cifrar la contraseña del servicio
         cifradoVigenere(co, autenticacion.master, coCifrada);
+
+        // Crear y agregar el servicio al final de la lista de servicios
         new(nuevoServicio);
         nuevoServicio^.nombreServicio := servn;
         nuevoServicio^.contraServCifrada := coCifrada;
@@ -111,7 +118,7 @@ begin
   end;
 end;
 
-
+// Procedimiento para recuperar la contraseña de un servicio
 procedure contraseniaServicio(us: Texto; master: Clave; servn: Texto; 
                                gc: TGestorContrasenia; authInfo: TAutenticacion; 
                                var res: TRes);
@@ -150,6 +157,7 @@ begin
   end;
 end;
 
+// Procedimiento para listar los servicios de un usuario
 procedure serviciosUsuario(us: Texto; master: Clave; gc: TGestorContrasenia; 
                            authInfo: TAutenticacion; var servs: TServicios; 
                            var existe: boolean);
@@ -162,14 +170,12 @@ begin
     existe := false
   else
   begin
-    // Buscar usuario
     i := 1;
     while (i <= gc.tope) and not igualTexto(gc.usuarios[i].usuario, us) do
       i := i + 1;
 
     if i <= gc.tope then
     begin
-      // Retornar la lista de servicios
       servs := gc.usuarios[i].serviciosUsuario;
       existe := true;
     end
